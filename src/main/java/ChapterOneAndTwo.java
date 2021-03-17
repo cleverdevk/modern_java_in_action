@@ -6,12 +6,11 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class ChapterOne {
+public class ChapterOneAndTwo {
     @Getter
     @ToString
     @RequiredArgsConstructor
     public static class Apple {
-
         enum Color {
             RED, GREEN
         }
@@ -74,6 +73,57 @@ public class ChapterOne {
             }
             return result;
         }
+
+        // strategy pattern
+        public interface ApplePredicate {
+            boolean test (Apple apple);
+        }
+
+        public static class AppleHeavyPredicate implements ApplePredicate {
+            public boolean test(Apple apple) {
+                return apple.getWeight() > 5;
+            }
+        }
+
+        public static class AppleGreenPredicate implements ApplePredicate {
+            public boolean test(Apple apple) {
+                return Color.GREEN.equals(apple.getColor());
+            }
+        }
+
+        public static List<Apple> filterApplesWithStrategyPattern(List<Apple> apples, ApplePredicate applePredicate) {
+            List<Apple> filteredApples = new ArrayList<>();
+            for (Apple apple : apples) {
+                if(applePredicate.test(apple)) {
+                    filteredApples.add(apple);
+                }
+            }
+            return filteredApples;
+        }
+
+        // quiz 2-1
+        public static void prettyPrintApple(List<Apple> apples, PrintFormat printFormat) {
+            for(Apple apple : apples) {
+                String output = printFormat.getString(apple);
+                System.out.println(output);
+            }
+        }
+
+        public interface PrintFormat {
+            public String getString(Apple apple);
+        }
+
+        public static class SimplePrintFormat implements PrintFormat {
+            public String getString(Apple apple) {
+                return String.format("Apple(weight=%d, color=%s)", apple.getWeight(), apple.getColor().toString());
+            }
+        }
+
+        public static class StarPrintFormat implements PrintFormat {
+            public String getString(Apple apple) {
+                return String.format("*Apple(*weight=%d, *color=%s)*", apple.getWeight(), apple.getColor().toString());
+            }
+        }
     }
 
     public static List<Apple> appleGenerator(int count) {
@@ -93,8 +143,8 @@ public class ChapterOne {
     }
 
     public static void run() {
-        List<ChapterOne.Apple> apples = ChapterOne.appleGenerator(10);
-        List<ChapterOne.Apple> apples2 = ChapterOne.appleGenerator(10);
+        List<Apple> apples = appleGenerator(10);
+        List<Apple> apples2 = appleGenerator(10);
 
         // before java 8 - sort
         Collections.sort(apples, new Comparator<Apple>() {
@@ -159,6 +209,28 @@ public class ChapterOne {
                 .collect(java.util.stream.Collectors.groupingBy(Apple::getColor));
 
         System.out.println(applesByColorUseStream);
+
+        // strategy pattern
+        List<Apple> heavyApplesByStrategyPattern = Apple.filterApplesWithStrategyPattern(apples, new Apple.AppleHeavyPredicate());
+        List<Apple> greenApplesByStrategyPattern = Apple.filterApplesWithStrategyPattern(apples, new Apple.AppleGreenPredicate());
+
+        System.out.println(heavyApplesByStrategyPattern.toString());
+        System.out.println(greenApplesByStrategyPattern.toString());
+
+        // quiz 2-1
+        Apple.prettyPrintApple(apples, new Apple.SimplePrintFormat());
+        Apple.prettyPrintApple(apples, new Apple.StarPrintFormat());
+
+        // use anonymous class
+        List<Apple> heavyApplesByAnonymousClass = Apple.filterApplesWithStrategyPattern(apples, new Apple.ApplePredicate() {
+            @Override
+            public boolean test(Apple apple) {
+                return apple.getWeight() > 5;
+            }
+        });
+
+        System.out.println(heavyApplesByAnonymousClass.toString());
+
     }
 
 }
