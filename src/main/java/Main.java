@@ -1,5 +1,6 @@
 public class Main {
-    public static void main(String[] args) {
-        ChapterOneAndTwo.run();
+    public static void main(String[] args) throws Exception {
+        // ChapterOneAndTwo.run();
+        ChapterThree.run();
     }
 }

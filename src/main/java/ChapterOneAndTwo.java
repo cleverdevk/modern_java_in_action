@@ -1,11 +1,13 @@
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.Predicate;
 
+@Slf4j
 public class ChapterOneAndTwo {
     @Getter
     @ToString
