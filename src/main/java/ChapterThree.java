@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static java.util.Comparator.comparing;
 
 @Slf4j
 class ChapterThree {
@@ -93,6 +97,24 @@ class ChapterThree {
 
         Predicate<ChapterOneAndTwo.Apple> p = apples::add;
         Consumer<ChapterOneAndTwo.Apple> c = (a) -> apples.toString();
+
+        // comparator - reversed, thenComparing
+        apples.sort(comparing(ChapterOneAndTwo.Apple::getWeight).reversed());
+        apples.sort(comparing(ChapterOneAndTwo.Apple::getWeight).reversed().thenComparing(ChapterOneAndTwo.Apple::getColor));
+
+        // predicate - negate, and, or
+        Predicate<ChapterOneAndTwo.Apple> greenApplePredicate = a -> a.getColor() == ChapterOneAndTwo.Apple.Color.GREEN;
+        Predicate<ChapterOneAndTwo.Apple> notGreenApplePredicate = greenApplePredicate.negate();
+        Predicate<ChapterOneAndTwo.Apple> notGreenHeavyApplePredicate = notGreenApplePredicate.and(a -> a.getWeight() > 5);
+
+        // function - andThen, compose
+        java.util.function.Function<Integer, Integer> adder = x -> x + 1;
+        java.util.function.Function<Integer, Integer> multiplier = x -> x * 2;
+        java.util.function.Function<Integer, Integer> addAndMultiplier = adder.andThen(multiplier);
+        System.out.println(addAndMultiplier.apply(10)); // multiplier(adder(10)) = 22
+
+        java.util.function.Function<Integer, Integer> multiplyAndAdder = adder.compose(multiplier);
+        System.out.println(multiplyAndAdder.apply(10)); // adder(multiplier(10)) = 22
 
     }
 
