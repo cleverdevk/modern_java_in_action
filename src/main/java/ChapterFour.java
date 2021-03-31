@@ -96,7 +96,7 @@ public class ChapterFour {
     }
 
     public static void run() {
-        List<Dish> dishes = randomDishGenerator(10);
+        List<Dish> dishes = randomDishGenerator(100);
 
         // parallelStream benchmark
         long beforeTime = System.currentTimeMillis();
@@ -112,14 +112,64 @@ public class ChapterFour {
 
 
         Stream<Dish> dishStream = dishes.stream();
-        dishStream.forEach(System.out::println);
+        // dishStream.forEach(System.out::println);
         // dishStream.forEach(System.out::println); // illegalStateError
 
-        System.out.println(threeHighCaloricDishNamesWithLog(dishes));
+        // System.out.println(threeHighCaloricDishNamesWithLog(dishes));
 
+        List<Integer> numbers = Arrays.asList(1,2,3,4,5,4,3,2,1);
+        numbers.stream()
+                .filter(n -> n % 2 == 0)
+                .distinct()
+                .forEach(System.out::println);
 
+        List<Dish> identicalDishes = new ArrayList<>();
+        Dish sampleDish = new Dish("bbb", 22, false, Dish.Type.MEAT);
+        identicalDishes.add(new Dish("aaa", 15, false, Dish.Type.FISH));
+        identicalDishes.add(new Dish("aaa", 15, false, Dish.Type.FISH));
+        identicalDishes.add(sampleDish);
+        identicalDishes.add(sampleDish);
 
+        identicalDishes.stream().distinct().forEach(System.out::println);
 
+        List<Dish> sortedDishes = dishes
+                .stream()
+                .sorted(Comparator.comparing(d -> d.getCalories()))
+                .collect(Collectors.toList());
+
+        List<Dish> lowCaloricDishes = sortedDishes
+                .stream()
+                .takeWhile(dish -> dish.getCalories() < 1)
+                .collect(Collectors.toList());
+
+        System.out.println(lowCaloricDishes);
+
+        List<String> words = Arrays.asList("Hello", "World");
+        List<String> letters = words
+                .stream()
+                .map(word -> word.split(""))
+                .flatMap(Arrays::stream)
+                .distinct()
+                .collect(Collectors.toList());
+
+        System.out.println(letters);
+
+        List<Integer> numbers1 = Arrays.asList(1,2,3);
+        List<Integer> numbers2 = Arrays.asList(3,4);
+
+        List<int[]> pairs = numbers1.stream()
+                                    .map(n -> numbers2.stream().map(n2 -> new int[]{n, n2}).collect(Collectors.toList()))
+                                    .flatMap(List::stream)
+                                    .filter(p -> p[0] + p[1] == 5)
+                                    .collect(Collectors.toList());
+
+        pairs.forEach(i -> System.out.println(String.format("%d,%d", i[0], i[1])));
+
+        Optional<Dish> dish = dishes.stream()
+                                .filter(Dish::isVegetarian)
+                                .findAny();
+
+        System.out.println(dish.get().toString());
 
 
     }
