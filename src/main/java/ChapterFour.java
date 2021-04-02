@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class ChapterFour {
@@ -95,6 +96,135 @@ public class ChapterFour {
                 .collect(Collectors.toList());
     }
 
+    public static class Trader{
+        private final String name;
+        private final String city;
+        public Trader(String n, String c){
+            this.name = n;
+            this.city = c;
+        }
+        public String getName(){
+            return this.name;
+        }
+        public String getCity(){
+            return this.city;
+        }
+        public String toString(){
+            return "Trader:"+this.name + " in " + this.city;
+        }
+    }
+    public static class Transaction{
+        private final Trader trader;
+        private final int year;
+        private final int value;
+        public Transaction(Trader trader, int year, int value){
+            this.trader = trader;
+            this.year = year;
+            this.value = value;
+        }
+        public Trader getTrader(){
+            return this.trader;
+        }
+        public int getYear(){
+            return this.year;
+        }
+        public int getValue(){
+            return this.value;
+        }
+        public String toString(){
+            return "{" + this.trader + ", " +
+                    "year: "+this.year+", " +
+                    "value:" + this.value +"}";
+        }
+    }
+
+    public static void practicalExample() {
+        Trader raoul = new Trader("Raoul", "Cambridge");
+        Trader mario = new Trader("Mario","Milan");
+        Trader alan = new Trader("Alan","Cambridge");
+        Trader brian = new Trader("Brian","Cambridge");
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(brian, 2011, 300),
+                new Transaction(raoul, 2012, 1000),
+                new Transaction(raoul, 2011, 400),
+                new Transaction(mario, 2012, 710),
+                new Transaction(mario, 2012, 700),
+                new Transaction(alan, 2012, 950)
+        );
+
+        // 1. 2011년에 일어난 모든 트랜잭션 오름차순
+        List<Integer> values = transactions.stream()
+                .filter(t -> t.getYear() == 2011)
+                .map(Transaction::getValue).sorted().collect(Collectors.toList());
+
+        System.out.println(values);
+
+        // 2. 거래자가 근무하는 모든 도시를 중복 없이
+        List<String> cities = transactions.stream()
+                .map(t -> t.getTrader().getCity())
+                .distinct()
+                .collect(Collectors.toList());
+
+        System.out.println(cities);
+
+        // 3. 케임브리지에서 근무하는 거래자 이름순 정렬
+        List<Trader> traders = transactions.stream()
+                .filter(t -> t.getTrader().getCity().equals("Cambridge"))
+                .map(Transaction::getTrader)
+                .sorted(Comparator.comparing(Trader::getName))
+                .collect(Collectors.toList());
+
+        System.out.println(traders);
+
+        // 4. 모든 거래자의 이름 알파벳 순으로 정렬
+        List<String> traderNames = transactions.stream()
+                .map(Transaction::getTrader)
+                .map(Trader::getName)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+
+        System.out.println(traderNames);
+
+        // 5. 밀라노에 거래자가 있는가?
+        transactions.stream()
+                .filter(t -> t.getTrader().getCity().equals("Milan"))
+                .findAny()
+                .ifPresentOrElse(System.out::println, () -> System.out.println("NO"));
+
+        // 6. 케임브리지에 거주하는 거래자의 모든 트랜잭션값을 출력하라.
+        List<Transaction> cambridgeTransactions = transactions.stream()
+                .filter(t -> t.getTrader().getCity().equals("Cambridge"))
+                .collect(Collectors.toList());
+
+        System.out.println(cambridgeTransactions);
+
+        // 7. 전체 트랜잭션 중 최대값
+        transactions.stream()
+                .map(Transaction::getValue)
+                .reduce(Integer::max)
+                .ifPresentOrElse(v -> System.out.println("MAX VALUE : " + Integer.toString(v)), () -> System.out.println("STREAM IS EMPTY!!"));
+
+        // 8. 최솟값
+        transactions.stream()
+                .map(Transaction::getValue)
+                .reduce(Integer::min)
+                .ifPresentOrElse(v -> System.out.println("MIN VALUE : " + Integer.toString(v)), () -> System.out.println("STREAM IS EMPTY!!"));
+    }
+
+    public static void pythagoras() {
+        List<int[]> numbers = IntStream.rangeClosed(1, 100).boxed()
+                .flatMap(a -> IntStream.rangeClosed(a, 100)
+                                .filter(b -> Math.sqrt(a*a + b*b) % 1 == 0)
+                                .mapToObj(b -> new int[]{a, b, (int) Math.sqrt(a*a + b*b)}))
+                .collect(Collectors.toList());
+
+        numbers.forEach(n ->
+            System.out.println(String.format("(%s,%s,%s)", n[0], n[1], n[2])));
+    }
+
+
+
     public static void run() {
         List<Dish> dishes = randomDishGenerator(100);
 
@@ -172,5 +302,35 @@ public class ChapterFour {
         System.out.println(dish.get().toString());
 
 
-    }
+        // reduce
+        int caloriesSum = dishes.stream().map(d -> d.getCalories()).reduce(0, Integer::sum);
+        System.out.println(caloriesSum);
+
+        Optional<Integer> maxCalorie = dishes.stream().map(Dish::getCalories).reduce(Integer::max);
+        maxCalorie.ifPresent(System.out::println);
+
+        practicalExample();
+
+        pythagoras();
+
+        // without Stream.ofNullable
+        String homeValue = System.getProperty("home");
+        Stream<String> homeValueStream = homeValue == null ? Stream.empty() : Stream.of(homeValue);
+
+        // with Stream.of
+        Stream<String> homeValueStreamByStreamOf = Stream.ofNullable(homeValue);
+
+        Stream<String> values = Stream.of("config", "home", "user", "user.home")
+                                .flatMap(key -> Stream.ofNullable(System.getProperty(key)));
+
+        values.forEach(System.out::println);
+
+        // fibonacci
+        Stream.iterate(new int[]{0, 1}, x -> new int[]{x[1], x[0] + x[1]})
+                .limit(10)
+                .forEach(x -> System.out.println(x[0]));
+
+
+
+}
 }
