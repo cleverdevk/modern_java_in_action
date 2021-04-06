@@ -163,7 +163,7 @@ public class ChapterOneAndTwo {
         System.out.println(apples2.toString());
 
         // before java 8 - filter : has code duplication!
-        List<Apple> greenApples =  Apple.filterGreenApples(apples);
+        List<Apple> greenApples = Apple.filterGreenApples(apples);
         List<Apple> heavyApples = Apple.filterHeavyApples(apples);
 
         System.out.println(greenApples.toString());
@@ -190,11 +190,11 @@ public class ChapterOneAndTwo {
 
         // not use stream
         Map<Apple.Color, List<Apple>> applesByColor = new HashMap<>();
-        for(Apple apple : soManyApples) {
-            if(apple.getWeight() > 5) {
+        for (Apple apple : soManyApples) {
+            if (apple.getWeight() > 5) {
                 Apple.Color color = apple.getColor();
                 List<Apple> appleForColor = applesByColor.get(color);
-                if(appleForColor == null) {
+                if (appleForColor == null) {
                     appleForColor = new ArrayList<>();
                     applesByColor.put(color, appleForColor);
                 }
@@ -207,8 +207,8 @@ public class ChapterOneAndTwo {
         // use stream
         Map<Apple.Color, List<Apple>> applesByColorUseStream =
                 soManyApples.stream()
-                .filter((Apple a) -> a.getWeight() > 5)
-                .collect(java.util.stream.Collectors.groupingBy(Apple::getColor));
+                        .filter((Apple a) -> a.getWeight() > 5)
+                        .collect(java.util.stream.Collectors.groupingBy(Apple::getColor));
 
         System.out.println(applesByColorUseStream);
 
@@ -232,7 +232,5 @@ public class ChapterOneAndTwo {
         });
 
         System.out.println(heavyApplesByAnonymousClass.toString());
-
     }
-
 }

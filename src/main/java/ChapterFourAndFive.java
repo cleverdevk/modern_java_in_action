@@ -9,46 +9,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class ChapterFour {
-    @Getter
-    @ToString
-    @AllArgsConstructor
-    public static class Dish {
-        private String name;
-        private int calories;
-        private boolean vegetarian;
-        private Type type;
-
-        public enum Type {
-            MEAT, FISH, OTHER
-        }
-
-        private static final List<Type> TYPES = Collections.unmodifiableList(Arrays.asList(Type.values()));
-        private static final int size = TYPES.size();
-        private static final Random random = new SecureRandom();
-        public static Type randomType() {
-            return TYPES.get(random.nextInt(size));
-        }
-    }
-
-    public static List<Dish> randomDishGenerator(int count) {
-        List<Dish> dishes = new ArrayList<>();
-        Random random = new SecureRandom();
-
-        for (int i = 0; i < count; i++) {
-            dishes.add(new Dish("dish" + random.nextInt(100),
-                    random.nextInt(1000),
-                    random.nextBoolean(),
-                    Dish.randomType()));
-        }
-
-        return dishes;
-    }
+public class ChapterFourAndFive {
 
     public static List<String> lowCaloriesDishNames(List<Dish> dishes) {
         List<Dish> lowCaloriesDishes = new ArrayList<>();
-        for(Dish dish : dishes) {
-            if(dish.getCalories() < 400) {
+        for (Dish dish : dishes) {
+            if (dish.getCalories() < 400) {
                 lowCaloriesDishes.add(dish);
             }
         }
@@ -59,7 +25,7 @@ public class ChapterFour {
             }
         });
         List<String> lowCaloriesDishNames = new ArrayList<>();
-        for(Dish dish : lowCaloriesDishes) {
+        for (Dish dish : lowCaloriesDishes) {
             lowCaloriesDishNames.add(dish.getName());
         }
 
@@ -96,53 +62,33 @@ public class ChapterFour {
                 .collect(Collectors.toList());
     }
 
-    public static class Trader{
+    public static class Trader {
         private final String name;
         private final String city;
-        public Trader(String n, String c){
+
+        public Trader(String n, String c) {
             this.name = n;
             this.city = c;
         }
-        public String getName(){
+
+        public String getName() {
             return this.name;
         }
-        public String getCity(){
+
+        public String getCity() {
             return this.city;
         }
-        public String toString(){
-            return "Trader:"+this.name + " in " + this.city;
-        }
-    }
-    public static class Transaction{
-        private final Trader trader;
-        private final int year;
-        private final int value;
-        public Transaction(Trader trader, int year, int value){
-            this.trader = trader;
-            this.year = year;
-            this.value = value;
-        }
-        public Trader getTrader(){
-            return this.trader;
-        }
-        public int getYear(){
-            return this.year;
-        }
-        public int getValue(){
-            return this.value;
-        }
-        public String toString(){
-            return "{" + this.trader + ", " +
-                    "year: "+this.year+", " +
-                    "value:" + this.value +"}";
+
+        public String toString() {
+            return "Trader:" + this.name + " in " + this.city;
         }
     }
 
     public static void practicalExample() {
         Trader raoul = new Trader("Raoul", "Cambridge");
-        Trader mario = new Trader("Mario","Milan");
-        Trader alan = new Trader("Alan","Cambridge");
-        Trader brian = new Trader("Brian","Cambridge");
+        Trader mario = new Trader("Mario", "Milan");
+        Trader alan = new Trader("Alan", "Cambridge");
+        Trader brian = new Trader("Brian", "Cambridge");
         List<Transaction> transactions = Arrays.asList(
                 new Transaction(brian, 2011, 300),
                 new Transaction(raoul, 2012, 1000),
@@ -215,18 +161,17 @@ public class ChapterFour {
     public static void pythagoras() {
         List<int[]> numbers = IntStream.rangeClosed(1, 100).boxed()
                 .flatMap(a -> IntStream.rangeClosed(a, 100)
-                                .filter(b -> Math.sqrt(a*a + b*b) % 1 == 0)
-                                .mapToObj(b -> new int[]{a, b, (int) Math.sqrt(a*a + b*b)}))
+                        .filter(b -> Math.sqrt(a * a + b * b) % 1 == 0)
+                        .mapToObj(b -> new int[]{a, b, (int) Math.sqrt(a * a + b * b)}))
                 .collect(Collectors.toList());
 
         numbers.forEach(n ->
-            System.out.println(String.format("(%s,%s,%s)", n[0], n[1], n[2])));
+                System.out.println(String.format("(%s,%s,%s)", n[0], n[1], n[2])));
     }
 
 
-
     public static void run() {
-        List<Dish> dishes = randomDishGenerator(100);
+        List<Dish> dishes = Dish.randomDishGenerator(100);
 
         // parallelStream benchmark
         long beforeTime = System.currentTimeMillis();
@@ -247,7 +192,7 @@ public class ChapterFour {
 
         // System.out.println(threeHighCaloricDishNamesWithLog(dishes));
 
-        List<Integer> numbers = Arrays.asList(1,2,3,4,5,4,3,2,1);
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 4, 3, 2, 1);
         numbers.stream()
                 .filter(n -> n % 2 == 0)
                 .distinct()
@@ -284,20 +229,20 @@ public class ChapterFour {
 
         System.out.println(letters);
 
-        List<Integer> numbers1 = Arrays.asList(1,2,3);
-        List<Integer> numbers2 = Arrays.asList(3,4);
+        List<Integer> numbers1 = Arrays.asList(1, 2, 3);
+        List<Integer> numbers2 = Arrays.asList(3, 4);
 
         List<int[]> pairs = numbers1.stream()
-                                    .map(n -> numbers2.stream().map(n2 -> new int[]{n, n2}).collect(Collectors.toList()))
-                                    .flatMap(List::stream)
-                                    .filter(p -> p[0] + p[1] == 5)
-                                    .collect(Collectors.toList());
+                .map(n -> numbers2.stream().map(n2 -> new int[]{n, n2}).collect(Collectors.toList()))
+                .flatMap(List::stream)
+                .filter(p -> p[0] + p[1] == 5)
+                .collect(Collectors.toList());
 
         pairs.forEach(i -> System.out.println(String.format("%d,%d", i[0], i[1])));
 
         Optional<Dish> dish = dishes.stream()
-                                .filter(Dish::isVegetarian)
-                                .findAny();
+                .filter(Dish::isVegetarian)
+                .findAny();
 
         System.out.println(dish.get().toString());
 
@@ -321,7 +266,7 @@ public class ChapterFour {
         Stream<String> homeValueStreamByStreamOf = Stream.ofNullable(homeValue);
 
         Stream<String> values = Stream.of("config", "home", "user", "user.home")
-                                .flatMap(key -> Stream.ofNullable(System.getProperty(key)));
+                .flatMap(key -> Stream.ofNullable(System.getProperty(key)));
 
         values.forEach(System.out::println);
 
@@ -331,6 +276,5 @@ public class ChapterFour {
                 .forEach(x -> System.out.println(x[0]));
 
 
-
-}
+    }
 }
