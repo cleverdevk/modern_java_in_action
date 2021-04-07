@@ -1,7 +1,16 @@
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@Slf4j
 public class ChapterSix {
     public static List<Transaction> initTransactions() {
         ChapterFourAndFive.Trader raoul = new ChapterFourAndFive.Trader("Raoul", "Cambridge");
@@ -40,13 +49,128 @@ public class ChapterSix {
         return transactions.stream().collect(Collectors.groupingBy(Transaction::getYear));
     }
 
+    // counting with reducing
+    public static <T> Collector<T, ?, Long> counting() {
+        return Collectors.reducing(0L, e -> 1L, Long::sum);
+    }
+
+    // grouping by type
+    public static Map<Dish.Type, List<Dish>> groupingByDishType(List<Dish> dishes) {
+        return dishes.stream().collect(Collectors.groupingBy(Dish::getType));
+    }
+
+    // grouping by calorie
+    public static enum CaloricLevel {
+        DIET, NORMAL, FAT
+    }
+
+    public static Map<CaloricLevel, List<Dish>> groupingByCalorie(List<Dish> dishes) {
+        return dishes.stream().collect(Collectors.groupingBy(d -> {
+            if (d.getCalories() < 300) return CaloricLevel.DIET;
+            if (d.getCalories() < 600) return CaloricLevel.NORMAL;
+            return CaloricLevel.FAT;
+        }));
+    }
+
+    public static Map<Dish.Type, List<Dish>> caloricDishesByType(List<Dish> dishes) {
+        return dishes.stream().collect(Collectors.groupingBy(
+                Dish::getType,
+                Collectors.filtering(d -> d.getCalories() > 500, Collectors.toList())
+        ));
+    }
+
+    // multi-level grouping
+    public static Map<Dish.Type, Map<CaloricLevel, List<Dish>>> dishesByTypeCaloricLevel(List<Dish> dishes) {
+        return dishes.stream().collect(Collectors.groupingBy(
+                Dish::getType,
+                Collectors.groupingBy(d -> {
+                    if (d.getCalories() < 300) return CaloricLevel.DIET;
+                    if (d.getCalories() < 600) return CaloricLevel.NORMAL;
+                    return CaloricLevel.FAT;
+                }, Collectors.toList())
+        ));
+    }
+
+    // count by Type
+    public static Map<Dish.Type, Long> dishCountByType(List<Dish> dishes) {
+        return dishes.stream().collect(Collectors.groupingBy(
+                Dish::getType,
+                counting()
+        ));
+    }
+
+    // max by Type without Optional
+    public static Map<Dish.Type, Dish> maxDishByType(List<Dish> dishes) {
+        return dishes.stream().collect(Collectors.groupingBy(
+                Dish::getType,
+                Collectors.collectingAndThen(Collectors.maxBy(Comparator.comparing(Dish::getCalories)), Optional::get)
+        ));
+    }
+
+    public static Map<Boolean, Map<Dish.Type, List<Dish>>> vegetarianDishesByType(List<Dish> dishes) {
+        return dishes.stream().collect(Collectors.partitioningBy(
+                Dish::isVegetarian,
+                Collectors.groupingBy(Dish::getType)
+                ));
+    }
+
+    public static boolean isPrime(int cand) {
+        return IntStream.rangeClosed(2, (int) Math.sqrt((double) cand))
+                .noneMatch(i -> cand % i == 0);
+    }
+
+    public static Map<Boolean, List<Integer>> partitionPrimes(int upto) {
+        return IntStream.rangeClosed(2, upto)
+                .boxed() // boxing int -> Integer
+                .collect(Collectors.partitioningBy(ChapterSix::isPrime));
+    }
+
+
+    // toList Collector Implementation
+    public static class ToListCollector<T> implements Collector<T, List<T>, List<T>> {
+
+        @Override
+        public Supplier<List<T>> supplier() {
+            log.info("NEW CONTAINER IS CREATED");
+            return ArrayList::new;
+        }
+
+        @Override
+        public BiConsumer<List<T>, T> accumulator() {
+            return List::add;
+        }
+
+        @Override
+        public BinaryOperator<List<T>> combiner() {
+            return (l1, l2) -> {
+                log.info("COMBINE CALLED");
+                log.info(l1.toString());
+                log.info(l2.toString());
+                l1.addAll(l2);
+                return l1;
+            };
+        }
+
+        @Override
+        public Function<List<T>, List<T>> finisher() {
+            return Function.identity();
+        }
+
+        @Override
+        public Set<Characteristics> characteristics() {
+            Set<Characteristics> set = new HashSet<>();
+            set.add(Characteristics.UNORDERED);
+            return set;
+        }
+    }
+
     public static void run() {
         List<Transaction> transactions = initTransactions();
 
         System.out.println(transactionsByYear(transactions));
         System.out.println(transactionsByYearWithStream(transactions));
 
-        List<Dish> dishes = Dish.randomDishGenerator(20);
+        List<Dish> dishes = Dish.randomDishGenerator(10);
 
         // counting
         long dishCount = dishes.stream().collect(Collectors.counting());
@@ -95,6 +219,35 @@ public class ChapterSix {
             l1.addAll(l2);
             return l1;
         });
+
+        // counting with reducing
+        long dishCountWithReducing = dishes.stream().collect(counting());
+        System.out.println("Count : " + dishCountWithReducing);
+
+        // grouping by type using groupingBy
+        System.out.println(groupingByDishType(dishes).toString());
+
+        // grouping by caloricLevel
+        System.out.println(groupingByCalorie(dishes).toString());
+
+        // grouping by filtered
+        System.out.println(caloricDishesByType(dishes).toString());
+
+        // grouping multi-level
+        System.out.println(dishesByTypeCaloricLevel(dishes));
+
+        // count by type
+        System.out.println(dishCountByType(dishes));
+
+        // partitioning - vegetarian
+        System.out.println(vegetarianDishesByType(dishes));
+
+        // Primes
+        System.out.println(partitionPrimes(20));
+
+
+
+        System.out.println(dishes.parallelStream().collect(new ToListCollector()));
 
 
     }
