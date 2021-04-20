@@ -6,7 +6,6 @@ import java.security.SecureRandom;
 import java.util.*;
 
 @Getter
-@ToString
 @AllArgsConstructor
 public class Dish {
     private String name;
@@ -37,6 +36,11 @@ public class Dish {
         }
 
         return dishes;
+    }
+
+    @Override
+    public String toString() {
+        return this.getName();
     }
 }
 

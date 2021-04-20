@@ -1,6 +1,8 @@
 import lombok.extern.slf4j.Slf4j;
 
+import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -125,6 +127,14 @@ public class ChapterSix {
                 .collect(Collectors.partitioningBy(ChapterSix::isPrime));
     }
 
+    public static class MyArrayList<T> extends ArrayList<T> {
+        public String name;
+        public MyArrayList() {
+            super();
+            name = "random" + Integer.toString(Math.abs(new SecureRandom().nextInt() % 100));
+            log.info("new called : " + name);
+        }
+    }
 
     // toList Collector Implementation
     public static class ToListCollector<T> implements Collector<T, List<T>, List<T>> {
@@ -132,20 +142,23 @@ public class ChapterSix {
         @Override
         public Supplier<List<T>> supplier() {
             log.info("NEW CONTAINER IS CREATED");
-            return ArrayList::new;
+            return MyArrayList::new;
         }
 
         @Override
         public BiConsumer<List<T>, T> accumulator() {
-            return List::add;
+            return (List<T> l, T e) -> {
+                log.info("ACC : " + ((MyArrayList)l).name);
+                l.add(e);
+            };
         }
 
         @Override
         public BinaryOperator<List<T>> combiner() {
             return (l1, l2) -> {
-                log.info("COMBINE CALLED");
-                log.info(l1.toString());
-                log.info(l2.toString());
+                log.info("COMBINE CALLED" + ((MyArrayList)l1).name + ", " + ((MyArrayList)l2).name);
+                log.info("COMBINE : " + ((MyArrayList)l1).name + " : " + l1.toString());
+                log.info("COMBINE : " + ((MyArrayList)l2).name + " : " + l2.toString());
                 l1.addAll(l2);
                 return l1;
             };
@@ -162,6 +175,60 @@ public class ChapterSix {
             set.add(Characteristics.UNORDERED);
             return set;
         }
+    }
+
+    // refactoring with custom collector
+    public static boolean isPrime(List<Integer> primes, int cand) {
+        int candRoot = (int) Math.sqrt((double) cand);
+        return primes.stream()
+                .takeWhile(i -> i <= candRoot)
+                .noneMatch(i -> cand % i == 0);
+    }
+
+    public static class PrimeNumbersCollector implements Collector<Integer, Map<Boolean, List<Integer>>, Map<Boolean, List<Integer>>> {
+
+        @Override
+        public Supplier<Map<Boolean, List<Integer>>> supplier() {
+            return () -> {
+                Map sup = new HashMap();
+                sup.put(true, new ArrayList<>());
+                sup.put(false, new ArrayList<>());
+                return sup;
+            };
+        }
+
+        @Override
+        public BiConsumer<Map<Boolean, List<Integer>>, Integer> accumulator() {
+            return (m, i) -> {
+                m.get(isPrime(m.get(true), i)).add(i);
+            };
+        }
+
+        @Override
+        public BinaryOperator<Map<Boolean, List<Integer>>> combiner() {
+            return (Map<Boolean, List<Integer>> m1, Map<Boolean, List<Integer>> m2) -> {
+                m1.get(true).addAll(m2.get(true));
+                m1.get(false).addAll(m2.get(false));
+                return m1;
+            };
+        }
+
+        @Override
+        public Function<Map<Boolean, List<Integer>>, Map<Boolean, List<Integer>>> finisher() {
+            return Function.identity();
+        }
+
+        @Override
+        public Set<Characteristics> characteristics() {
+            return Collections.unmodifiableSet(EnumSet.of(Characteristics.IDENTITY_FINISH));
+        }
+    }
+
+    // primes with custom collector
+    public static Map<Boolean, List<Integer>> partitionPrimesWithCustomCollector(int upto) {
+        return IntStream.rangeClosed(2, upto)
+                .boxed() // boxing int -> Integer
+                .collect(new PrimeNumbersCollector());
     }
 
     public static void run() {
@@ -248,6 +315,10 @@ public class ChapterSix {
 
 
         System.out.println(dishes.parallelStream().collect(new ToListCollector()));
+
+        // primes with custom collector
+        System.out.println(partitionPrimesWithCustomCollector(20));
+
 
 
     }
