@@ -1,6 +1,7 @@
+package objects;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.security.SecureRandom;
 import java.util.*;
