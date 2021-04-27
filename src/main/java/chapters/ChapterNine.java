@@ -1,13 +1,15 @@
 package chapters;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import objects.Point;
+
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ChapterNine {
     public interface Task {
@@ -291,5 +293,24 @@ public class ChapterNine {
 
         Product ap2 = productSupplier.get("A").get();
         Product bp2 = productSupplier.get("B").get();
+
+
+        // just for debugging
+//        List<Point> points = Arrays.asList(new Point(2, 2), null);
+//        points.stream().map(Point::getX).forEach(System.out::println);
+
+
+        // peek
+        List<Integer> ns = Stream.of(1,2,3,4)
+                .peek(System.out::println)
+                .map(x -> x + 1)
+                .peek(System.out::println)
+                .filter(x -> x % 2 == 0)
+                .peek(System.out::println)
+                .limit(3)
+                .peek(System.out::println)
+                .collect(Collectors.toList());
+
+        System.out.println(ns);
     }
 }

@@ -67,17 +67,6 @@ public class ChapterOneAndTwo {
             return filteredApples;
         }
 
-        static <T> List<T> filter(List<T> c, Predicate p) {
-            List<T> result = new ArrayList<>();
-
-            for(T t : c) {
-                if(p.test(t)) {
-                    result.add(t);
-                }
-            }
-            return result;
-        }
-
         // strategy pattern
         public interface ApplePredicate {
             boolean test (Apple apple);
@@ -234,5 +223,16 @@ public class ChapterOneAndTwo {
         });
 
         System.out.println(heavyApplesByAnonymousClass.toString());
+    }
+
+    public static <T> List<T> filter(List<T> c, Predicate<T> p) {
+        List<T> result = new ArrayList<>();
+
+        for(T t : c) {
+            if(p.test(t)) {
+                result.add(t);
+            }
+        }
+        return result;
     }
 }
