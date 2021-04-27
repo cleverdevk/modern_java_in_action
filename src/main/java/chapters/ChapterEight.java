@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChapterEight {
     private static byte[] calculateDigest(String key) throws NoSuchAlgorithmException {
@@ -96,7 +97,9 @@ public class ChapterEight {
         System.out.println(mergeTest2);
 
         // ConcurrentHashMap
-
+        ConcurrentHashMap<String, Integer> cm = new ConcurrentHashMap();
+        cm.put("a", 1);
+        cm.keySet().forEach(k -> System.out.println(k));
 
 
 

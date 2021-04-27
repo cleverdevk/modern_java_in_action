@@ -157,5 +157,7 @@ public class ChapterSeven {
         Stream<Character> streamWithSpliterator = StreamSupport.stream(spliterator, true);
         System.out.println("Correct : " + countWords(streamWithSpliterator));
 
+        ForkJoinSumCalculator.forkJoinSum(100000000);
+
     }
 }
