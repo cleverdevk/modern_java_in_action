@@ -31,6 +31,14 @@ public class ChapterTwelve {
         LocalDateTime ldt4 = date.atTime(timeFromString);
         LocalDateTime ldt5 = timeFromString.atDate(date);
 
+        LocalDateTime dateTime = LocalDateTime.of(1994, Month.APRIL, 16, 15, 15);
+
+        // utc offset
+        ZoneOffset newYorkOffset = ZoneOffset.of("-05:00");
+        OffsetDateTime dateTimeInNewYork = OffsetDateTime.of(dateTime, newYorkOffset);
+        System.out.println(dateTimeInNewYork);
+
+
 
     }
 
