@@ -1,6 +1,6 @@
-package objects;
+package objects.shapes;
 
-public interface ResizableV1 {
+public interface Resizable {
 	int getWidth();
 	int getHeight();
 	void setWidth(int width);

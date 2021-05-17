@@ -1,13 +1,18 @@
-package objects;
+package objects.shapes;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import objects.shapes.Resizable;
 
 @AllArgsConstructor
-@NoArgsConstructor
-public class Rectangle implements ResizableV1{
+public class Rectangle implements Resizable {
 	private int width;
 	private int height;
+
+	public Rectangle() {
+		this.width = 5;
+		this.height = 5;
+	}
 
 	@Override
 	public int getWidth() {
