@@ -1,11 +1,14 @@
 package chapters;
 
-import objects.HotDealFinder;
-import objects.Shop;
+import lombok.extern.slf4j.Slf4j;
+import objects.shop.HotDealFinder;
+import objects.shop.Shop;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.*;
 
+@Slf4j
 public class ChapterSixteen {
     public static void run() {
         // using Future before Java 8
@@ -62,6 +65,8 @@ public class ChapterSixteen {
         // List<String> hotDeals = hotDealFinder.findPrice("sony 16-35 f4 lens");
         // System.out.println(hotDeals);
 
+        System.out.println("Shops Count : " + hotDealFinder.getShopsCount());
+
         start = System.nanoTime();
         List<String> hotDeals = hotDealFinder.findPriceWithParallelStream("sony a7 m III");
         // System.out.println(hotDeals);
@@ -73,6 +78,17 @@ public class ChapterSixteen {
         // System.out.println(hotDeals);
         diff = ((System.nanoTime() - start) / 1_000_000);
         System.out.println("CompletableFuture : " + diff);
+
+        start = System.nanoTime();
+        hotDeals = hotDealFinder.findPriceWithCompletableFutureAndCustomExecutor("sony a7 m III");
+        // System.out.println(hotDeals);
+        diff = ((System.nanoTime() - start) / 1_000_000);
+        System.out.println("CompletableFuture : " + diff);
+
+        CompletableFuture[] futures = hotDealFinder.findDiscountedPricesStream("canon")
+                .map(fu -> fu.thenAccept(r -> log.info(String.format("[%s] %s", LocalDateTime.now().toString(), r))))
+                .toArray(size -> new CompletableFuture[size]);
+        CompletableFuture.allOf(futures).join();
 
 
     }

@@ -1,6 +1,5 @@
-package objects;
+package objects.shop;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.security.SecureRandom;
@@ -51,6 +50,12 @@ public class Shop {
         return CompletableFuture.supplyAsync(() -> calculatePrice(product));
     }
 
+    public String getPriceForDiscount(String product) {
+        double price = calculatePrice(product);
+        Discount.Code code = Discount.Code.values()[random.nextInt(Discount.Code.values().length)];
+        return String.format("%s:%.2f:%s", name, price, code);
+    }
+
     private double calculatePrice(String product) {
         delayMocking();
         if (product.length() == 0) {
@@ -60,9 +65,10 @@ public class Shop {
     }
     public void delayMocking() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(random.nextInt(3) * 1000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
+
 }
